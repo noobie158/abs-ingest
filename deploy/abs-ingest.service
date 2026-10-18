@@ -1,0 +1,22 @@
+[Unit]
+Description=Audiobookshelf ingest (inbox -> library)
+After=network-online.target audiobookshelf.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=abs-ingest
+Group=audiobookshelf
+# new files are group-writable
+UMask=0002
+# contains ABS_TOKEN=... (chmod 600)
+EnvironmentFile=/etc/abs-ingest/env
+ExecStart=/opt/abs-ingest/venv/bin/abs-ingest --config /etc/abs-ingest/config.yaml watch
+Restart=on-failure
+RestartSec=10
+# journald keeps the live log: journalctl -fu abs-ingest
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

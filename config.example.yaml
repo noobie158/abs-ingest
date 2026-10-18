@@ -1,0 +1,48 @@
+# abs-ingest configuration. Copy to /etc/abs-ingest/config.yaml (or pass --config).
+
+paths:
+  # Keep everything on ONE filesystem so moves are instant renames.
+  root: /srv/audiobooks
+  # inbox, processing, review, failed and library default to <root>/<name>;
+  # override any of them here if needed:
+  # library: /srv/audiobooks/library
+
+permissions:
+  owner: abs-ingest         # only applied when the service runs as root
+  group: audiobookshelf     # every book gets this group
+  dir_mode: "2775"          # octal; leading 2 = setgid
+  file_mode: "664"
+  use_setfacl: false        # true = also run setfacl -R (needs the 'acl' package)
+
+watch:
+  poll_seconds: 10          # how often the inbox is checked
+  stable_seconds: 60        # a book must be unchanged this long (copy finished)
+
+identify:
+  auto_threshold: 0.85      # confidence needed to file without a human (0..1)
+
+naming:
+  # fields: {author} {series} {number} {title}
+  series: "{author}/{series}/Book {number} - {title}"
+  series_no_number: "{author}/{series}/{title}"
+  standalone: "{author}/{title}"
+
+audiobookshelf:
+  url: http://localhost:13378
+  # Token: put ABS_TOKEN=... in /etc/abs-ingest/env (not in this file).
+  # Create it in Audiobookshelf: Settings -> Users -> your user -> API token.
+  token_env: ABS_TOKEN
+  library_id: ""            # destination library ID; scanned after filing
+  review_library_id: ""     # source library ID for process-matched
+  provider: audible         # metadata source used for identification
+
+notify:
+  # Phone push through ntfy.sh (or your own ntfy server). Leave empty to disable.
+  ntfy_topic: ""
+  ntfy_server: https://ntfy.sh
+  events: [review, failed]  # add "filed" to be told about every success
+
+logging:
+  file: /var/log/abs-ingest/ingest.log
+
+# aliases_file: /srv/audiobooks/aliases.yaml   # default: <root>/aliases.yaml
