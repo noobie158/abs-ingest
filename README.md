@@ -1,4 +1,6 @@
-# Audiobookshelf Ingest Automation
+# abs-ingest
+
+Audiobookshelf ingest automation.
 
 ## 1. Project goal
 
